@@ -59,7 +59,28 @@ driver.get('https://www.aladin.co.kr/shop/common/wbest.aspx?BranchType=1&start=w
 driver.implicitly_wait(10)
 
 # 엑셀에 텍스트 저장 (헤더 만들기)
-cell_format = workbook.add_format({'bold': True, 'font_color': 'red', 'bg_color':'yellow', 'font_size':'13'})
+cell_format = workbook.add_format({
+    'font_name': '함초롱돋움',
+    'bold': True,
+    'font_color': 'red',
+    'bg_color':'yellow',
+    'font_size':'15',
+    'align': 'center',
+    'valign': 'vcenter',
+    'border': 2,
+    'border_color': 'black'
+    })
+
+# 셀 너비 조정
+# worksheet.set_column(시작열, 끝 열 번호, 길이, 서식양식(format))
+# 셀 높이 조정
+# worksheet.set_row(행번호, 높이, 서식양식(format))
+worksheet.set_column(0, 6, 40)
+for n in range(1, 401):
+    worksheet.set_row(n, 100)
+
+'''
+-> 셀 번호를 열+행으로 직접 지목해서 값을 넣은 경우
 worksheet.write('A1', '썸네일', cell_format)
 worksheet.write('B1', '제목', cell_format)
 worksheet.write('C1', '작가', cell_format)
@@ -67,6 +88,16 @@ worksheet.write('D1', '출판사', cell_format)
 worksheet.write('E1', '출판일', cell_format)
 worksheet.write('F1', '가격', cell_format)
 worksheet.write('G1', '링크', cell_format)
+'''
+# enumerate 함수는 순서가 있는 자료형(리스트, 튜플, 문자열)을 전달받아 인덱스와 해당 항목을
+# 포함하는 튜플을 반환하는 함수입니다.
+headers = ['썸네일', '제목', '작가', '출판사', '출판일', '가격', '링크']
+for col, header in enumerate(headers):
+    # write(행번호, 열번호, 셀에 들어갈 문자열, 포멧 형식)
+    # 행번호는 0번(첫번째 행)으로 고정.
+    # col에 인덱스가 전달됨. -> 열 번호
+    worksheet.wirte(0, col, header, cell_format)
+
 
 # selenium으로 현재 패이지의 html 소스 코드를 전부 불러오기
 cur_page_num = 2 # 현재 페이지 번호
@@ -96,9 +127,24 @@ while cur_page_num <= target_page_num:
 
         # 작가쪽 영역 데이터를 상세 분해
         author_data = author.text.split(' | ')
+        '''
         author_name = author_data[0].strip()
         company = author_data[1].strip()
         pub_day = author_data[2].strip()
+        '''
+        # list comprehension
+        # 기존의 리스트를 기반으로 새로운 리스트를 선언하는데,
+        # 리스트 내부의 요소들에게 일괄적으로 적용할 수식, 조건, 함수의 리턴값을 동시에 설정할 수 있게 하는 문법.
+        '''
+        li = [1, 2, 3, 4, 5]
+        new_li = [n * 2 for n in li] -> [2, 4, 6, 8, 10]
+
+        li = [1, 2, 3, 4, 5,]
+        new_li = [n for n in li if n % 2 != 0] -> [1, 3, 5, 7, 9]
+        '''
+
+        author_name, company, pub_day = [info.strip() for info in author_data]
+
 
         # 가격
         price = author.find_next_sibling() # 작가 li 다음 형제 요소가 가격 li이다.
